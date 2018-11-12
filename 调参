@@ -1,0 +1,92 @@
+一. 参数是指那些？
+
+1. 数据处理（或预处理）相关参数：
+enrich data(丰富数据库)，
+feature normalization and scaling（数据泛化处理）,
+batch normalization（BN处理）,
+2. 训练过程与训练相关的参数：
+momentum term（训练动量）,
+BGD, SGD, mini batch gradient descent(这里的理解可以看我之前的一篇博 客：http://blog.csdn.net/qq_20259459/article/details/53943413 ）。
+number of epoch,
+learning rate(学习率），
+objective function(衰减函数),
+weight initialization(权值初始化),
+regularization(正则化相关方法),
+3. 网络相关参数：
+number of layers,
+number of nodes,
+number of filters,
+classifier(分类器的选择),
+
+
+二. 调参的目的以及会出现的问题
+目的：1. 当网络出现训练错误的时候，我们自然需要调整参数。 2. 可以训练但是需要提高整个网络的训练准确度。
+问题：
+1. 可能没法进行有效地训练，整个网络是错误的,完全不收敛（以下图片全部来源于我的实验，请勿盗用）：
+
+2. 部分收敛：
+
+3. 全部收敛但是结果不好：
+
+
+三. 问题分析理解
+
+在深度学习领域我上面的三个例子可以说是比较全面的概括了问题的种类：完全不收敛，部分收敛，全部收敛但是误差大。
+下面我们先进行问题分析，然后我再介绍如何具体调参：
+1. 完全不收敛：
+
+这种问题的出现可以判定两种原因：1，错误的input data，网络无法学习。 2，错误的网络，网络无法学习. 
+2. 部分收敛：
+
+1，underfitting。 2， overfitting。
+underfitting和overfitting在深度学习中是两个最最常见的现象，他们的本质是网络分类器的复杂度导致的。
+一个过简单的分类器面对一个复杂的数据就会出现underfitting，举个例子：比如一个2类分类器他是无法实现XOR的问题的。
+一个过复杂的分类器面对一个简单的数据就会出现overfitting。
+说的更容易理解一点：
+1.underfitting就是网络的分类太简单了没办法去分类，因为没办法分类就是没办法学到正确的知识。
+2.overfitting就是网络的分类太复杂了以至于它可以学习数据中的每一个信息甚至是错误的信息他都可以学习。
+
+3. 全部收敛：
+
+这是个好的开始，接下来我们要做的就是微调一些参数。
+
+
+四. 针对问题来调参
+
+许多人提出使用暴力调参和微调配合使用。
+下面我们谈谈如和调参：
+现有的可调参数我已经在（一）中写出了，而这些参数其实有一些是现在大家默认选择的，
+比如激活函数我们现在基本上都是采用Relu，而momentum一般我们会选择0.9-0.95之间，weight decay我们一般会选择0.005, 
+filter的个数为奇数，而dropout现在也是标配的存在。这些都是近年来论文中通用的数值，也是公认出好结果的搭配。
+所以这些参数我们就没有必要太多的调整。下面是我们需要注意和调整的参数。
+1. 完全不收敛：
+
+请检测自己的数据是否存在可以学习的信息，这个数据集中的数值是否泛化（防止过大或过小的数值破坏学习）。
+如果是错误的数据则你需要去再次获得正确的数据，如果是数据的数值异常我们可以使用zscore函数来解决这个问题（参见我的博客： http://blog.csdn.net/qq_20259459/article/details/59515182 ）。
+如果是网络的错误，则希望调整网络，包括：网络深度，非线性程度，分类器的种类等等。
+2. 部分收敛：
+
+underfitting: 
+增加网络的复杂度（深度），
+降低learning rate，
+优化数据集，
+增加网络的非线性度（ReLu），
+采用batch normalization，
+overfitting: 
+丰富数据，
+增加网络的稀疏度，
+降低网络的复杂度（深度），
+L1 regularization,
+L2 regulariztion,
+添加Dropout，
+Early stopping,
+适当降低Learning rate，
+适当减少epoch的次数，
+3. 全部收敛：
+
+调整方法就是保持其他参数不变，只调整一个参数。这里需要调整的参数会有：
+learning rate,
+minibatch size，
+epoch，
+filter size,
+number of filter,(这里参见我前面两篇博客的相关filter的说明）
